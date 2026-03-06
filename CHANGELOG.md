@@ -6,6 +6,34 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 
 ---
 
+## [2026.3.6-3] - 2026-03-06
+
+### Added
+- x402 payment protocol support: domain knowledge (`docs/x402-payments.md`) + payment client (`scripts/x402_pay.py`)
+- EIP-3009 (transferWithAuthorization) signing for USDC gasless payments
+- Solana partial-sign for x402 payment transactions
+- Full HTTP 402 flow: fetch → parse requirements → sign → retry with `PAYMENT-SIGNATURE` header
+- Budget & safety controls documentation for agent spending
+- Pinata IPFS upload testing guide in x402 domain knowledge
+- Design Principles section in README (domain knowledge + tools, zero external deps, API infrastructure)
+
+### Fixed
+- EIP-712 signing: replaced `encode_typed_data` with manual hash computation (bytes32 encoding mismatch with facilitators)
+- `validAfter` clock skew: now uses `now - 600` (10-minute tolerance, matches official SDK)
+- Authorization return values now derived from signed message (prevents signature/payload mismatch)
+
+### Tested
+- Pinata IPFS private upload on Base mainnet ✅ — $0.001 USDC, settlement TX `0x5bbfe577d39da850bd29483b859a7edd07f3a0d92701177d3ed889af7fcca556`
+- x402.org facilitator verify (Base Sepolia) ✅ — `isValid: true`
+
+### Audit
+- ✅ No new external dependencies — uses only `eth_account`, `eth_abi`, `eth_utils`, `requests` (all pre-installed)
+- ✅ x402_pay.py is self-contained, independent from bitget_api.py
+- ✅ No credential changes
+- ✅ Only communicates with user-specified x402 resource servers + facilitators
+
+---
+
 ## [2026.3.5-2] - 2026-03-05
 
 ### Added
@@ -105,3 +133,5 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 - ✅ Demo API keys are public (non-sensitive)
 - ✅ No local file system writes
 - ✅ No network calls except to `bopenapi.bgwapi.io`
+
+
