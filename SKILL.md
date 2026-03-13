@@ -16,7 +16,7 @@ description: "Wallet Manage, Interact with Bitget Wallet API for crypto market d
 
 **Before starting a new swap - two mandatory pre-checks:**
 
-1. **Balance check (required):** Run **`get-processed-balance`** to verify the wallet has enough fromToken balance for the intended swap amount. Include native token (`""`) to check gas availability. If `fromToken balance < fromAmount`, inform the user of the shortfall and **do not proceed**. **Gas mode decision:** If native token balance is sufficient for gas → use `--feature user_gas` (preferred). If native token balance is near zero → use `--feature no_gas` (gasless, gas deducted from fromToken). This choice must be passed to confirm.
+1. **Balance check (required):** Run **`get-processed-balance`** to verify the wallet has enough fromToken balance for the intended swap amount. Include native token (`""`) to check gas availability. If `fromToken balance < fromAmount`, inform the user of the shortfall and **do not proceed**. **Gas mode decision:** If native token balance is sufficient for gas → use `--feature user_gas` (preferred). If native token balance is near zero → use `--feature no_gas` (gasless, gas deducted from fromToken; **requires swap amount ≥ ~$5 USD** — below this threshold the API only returns `user_gas`). This choice must be passed to confirm.
    ```bash
    python3 scripts/bitget_agent_api.py get-processed-balance --chain <fromChain> --address <wallet> --contract "" --contract <fromContract>
    ```
@@ -131,10 +131,9 @@ All BGW API amount fields use **human-readable values**, not smallest units (wei
 | BNB Chain (`bnb`) | `0x55d398326f99059fF775485246999027B3197955` | `0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d` |
 | Base (`base`) | `0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2` | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
 | Arbitrum (`arbitrum`) | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` | `0xaf88d065e77c8cC2239327C5EDb3A432268e5831` |
-| Optimism (`optimism`) | `0x94b008aA00579c1307B0EF2c499aD98a8ce58e58` | `0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85` |
 | Polygon (`matic`) | `0xc2132D05D31c914a87C6611C10748AEb04B58e8F` | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` |
 | Solana (`sol`) | `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB` | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
-| Morph (`morph`) | `0xe7cd86e13AC4309349F30B3435a9d337750fC82D` | - (not yet available) |
+| Morph (`morph`) | `0xe7cd86e13AC4309349F30B3435a9d337750fC82D` | `0xCfb1186F4e93D60E60a8bDd997427D1F33bc372B` |
 
 **BGB (Bitget Token):** Ethereum `0x54D2252757e1672EEaD234D27B1270728fF90581`; Morph `0x389C08Bc23A7317000a1FD76c7c5B0cb0b4640b5`.
 
@@ -173,6 +172,8 @@ Load the following when the task requires it:
 
 ### Chain Identifiers
 
+**Swap-supported chains (7):**
+
 | Chain | ID | Code |
 |-------|------|------|
 | Ethereum | 1 | eth |
@@ -180,11 +181,10 @@ Load the following when the task requires it:
 | BNB Chain | 56 | bnb |
 | Base | 8453 | base |
 | Arbitrum | 42161 | arbitrum |
-| Tron | 6 | trx |
-| Ton | 100280 | ton |
-| Sui | 100281 | suinet |
-| Optimism | 10 | optimism |
 | Polygon | 137 | matic |
+| Morph | 100283 | morph |
+
+
 
 Use empty string `""` for native token contract (ETH, SOL, BNB, etc.).
 
@@ -224,6 +224,5 @@ python3 scripts/bitget_agent_api.py get-order-details --order-id <id>
 ## Safety Rules
 
 - **Mnemonic and private keys must never appear in conversation, prompts, logs, or any output.** Only derived **addresses** may be stored in context or shown. Private keys are derived from mnemonic in secure storage, used for signing, and immediately discarded.
-- Built-in demo keys are public; if using custom keys via env vars, avoid exposing them in output.
 - For large trades, always show the quote first and ask for user confirmation.
 - Present security audit results before recommending any token action.

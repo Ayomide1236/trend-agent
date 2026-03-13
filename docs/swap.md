@@ -36,7 +36,35 @@ python3 scripts/bitget_agent_api.py get-processed-balance --chain <fromChain> --
 
 - If **fromToken balance < fromAmount**: inform the user of the shortfall (e.g., "You have 5.85 USDT but requested 6 USDT") and **do not proceed**.
 - If **native token balance ≈ 0**: warn the user about insufficient gas. Suggest reducing the swap amount or using gasless mode if available.
+- **Gasless minimum thresholds:** The API only returns `features: ["no_gas"]` when the swap amount meets a minimum USD value. Below this threshold, only `user_gas` is available and native token is required for gas. Tested 2026-03-13:
+
+  | Chain | Gasless threshold | Notes |
+  |-------|-------------------|-------|
+  | Ethereum | ≥ $5 USD | 4U → `user_gas`, 5U → `no_gas` ✅ |
+  | BNB Chain | ≥ $5 USD | 4U → `user_gas`, 5U → `no_gas` ✅ |
+  | Base | ≥ $5 USD | 4U → `user_gas`, 5U → `no_gas` ✅ |
+  | Arbitrum | ≥ $5 USD | 4U → `user_gas`, 5U → `no_gas` ✅ |
+  | Polygon | ≥ $5 USD | 4U → `user_gas`, 5U → `no_gas` ✅ |
+  | Solana | ≥ $5 USD | 4U → `user_gas`, 5U → `no_gas` ✅ |
+  | Morph | ≥ $1 USD | Gasless availability depends on token contract; check quote `features` |
+
+  Always check the quote response `features` field to confirm gasless availability.
 - The API error `40001: Demo trading failed` from the confirm step is often caused by insufficient balance, not slippage — always check balance first.
+- **Cross-chain amount limits:** Cross-chain swaps have per-chain minimum and maximum amount limits depending on the bridge protocol. Amounts outside these ranges will fail at quote or order stage.
+
+  | From Chain | liqBridge | CCTP |
+  |------------|-----------|------|
+  | Ethereum | 1U – 200,000U | 0.1U – 500,000U |
+  | Solana | 10U – 200,000U | — |
+  | BSC | 1U – 200,000U | — |
+  | Base | 1U – 200,000U | 0.1U – 500,000U |
+  | Arbitrum | 1U – 200,000U | 0.1U – 500,000U |
+  | Polygon | 1U – 50,000U | 0.1U – 500,000U |
+  | Morph | 5U – 50,000U | 0.1U – 500,000U |
+
+  - **liqBridge:** Default cross-chain bridge, wider chain coverage.
+  - **CCTP (Circle):** USDC-native bridge, higher max limit but only on supported chains (ETH/Base/Arbitrum/Polygon/Morph).
+  - The bridge protocol is auto-selected by the API based on the token pair and route. Agent should validate the swap amount falls within the range before proceeding.
 
 **2. Token risk check (required before every new swap)**
 
@@ -149,18 +177,19 @@ On EVM chains, tokens must be **approved** for the router before spending. Witho
 
 - **getOrderDetails:** `data.details.status === "success"` means success; show `fromTxId` / `toTxId` and block explorer links. When status is success, ignore the response `tips` field. When status is not success, use the `tips` field to prompt the user and suggest retry or adjusting amount/slippage if appropriate.
 
-## Block explorer URLs
+## Supported swap chains
 
-| Chain | Explorer URL |
-|-------|---------------|
-| eth | `https://etherscan.io/tx/{txId}` |
-| bnb | `https://bscscan.com/tx/{txId}` |
-| base | `https://basescan.org/tx/{txId}` |
-| arbitrum | `https://arbiscan.io/tx/{txId}` |
-| matic | `https://polygonscan.com/tx/{txId}` |
-| optimism | `https://optimistic.etherscan.io/tx/{txId}` |
-| sol | `https://solscan.io/tx/{txId}` |
-| trx | `https://tronscan.org/#/transaction/{txId}` |
+The swap API supports 7 chains. Use these chain codes in all swap commands:
+
+| Chain | Code | Explorer URL |
+|-------|------|--------------|
+| Ethereum | eth | `https://etherscan.io/tx/{txId}` |
+| BNB Chain | bnb | `https://bscscan.com/tx/{txId}` |
+| Base | base | `https://basescan.org/tx/{txId}` |
+| Arbitrum | arbitrum | `https://arbiscan.io/tx/{txId}` |
+| Polygon | matic | `https://polygonscan.com/tx/{txId}` |
+| Morph | morph | `https://explorer.morphl2.io/tx/{txId}` |
+| Solana | sol | `https://solscan.io/tx/{txId}` |
 
 ## Common pitfalls
 
