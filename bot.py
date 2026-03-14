@@ -31,7 +31,7 @@ BOT_TOKEN            = "8258813509:AAHATQBeAxVP73hBCpKcfzu1dHS465wARjQ"
 CHAIN                = "sol"
 SOL_CONTRACT         = "So11111111111111111111111111111111111111112"
 SOL_SYMBOL           = "SOL"
-TRADE_AMOUNT_SOL     = 0.1
+TRADE_AMOUNT_SOL     = 0.005
 PNL_LOG_FILE         = "pnl_log.json"
 WALLETS_FILE         = "wallets.json"
 
