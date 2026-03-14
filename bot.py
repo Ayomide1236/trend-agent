@@ -290,7 +290,7 @@ async def cmd_scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
             str(i) + ". *" + symbol + "* " + status + "\n"
             "   Price: $" + str(round(price, 8)) + "\n"
             "   24h: +" + str(round(change, 1)) + "% | Vol: $" + str(round(volume)) + "\n"
-            "   Security: " + reason
+            "   Security: " + reason + "\n" + "   Contract: `" + contract + "`"
         )
 
         if safe and contract:
